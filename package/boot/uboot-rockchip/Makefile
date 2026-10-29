@@ -42,6 +42,20 @@ define U-Boot/rock-pi-s-rk3308
     radxa_rock-pi-s
 endef
 
+# RK3128 boards
+
+define U-Boot/rk3128/Default
+  BUILD_SUBTARGET:=armv7
+endef
+
+
+define U-Boot/txcz-v3-1-rk3128
+  $(U-Boot/rk3128/Default)
+  NAME:=TXCZ V3-1
+  BUILD_DEVICES:= \
+    txcz_v3-1
+endef
+
 # RK3328 boards
 
 define U-Boot/rk3328/Default
@@ -411,6 +425,7 @@ define U-Boot/rock-5c-rk3588s
 endef
 
 UBOOT_TARGETS := \
+  txcz-v3-1-rk3128 \
   nanopc-t4-rk3399 \
   nanopi-r4s-rk3399 \
   rock-4c-plus-rk3399 \
