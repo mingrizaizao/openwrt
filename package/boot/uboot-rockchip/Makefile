@@ -5,9 +5,17 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_VERSION:=2025.10
+PKG_NAME:=u-boot
+PKG_VERSION:=2026-11-09
 PKG_RELEASE:=1
-PKG_HASH:=b4f032848e56cc8f213ad59f9132c084dbbb632bc29176d024e58220e0efdf4a
+
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/mingrizaizao/u-boot-rockchip.git
+PKG_SOURCE_DATE:=2026-11-09
+PKG_SOURCE_VERSION:=ea5659f3a4fe8edc2944ad6ebadbaa9a8e9d69b7
+PKG_MIRROR_HASH:=5bf09914502e77827ea6bca51f1969318dc58c18343431c8b9cb2e6d0c781a0b
+PKG_BUILD_DEPENDS:=PACKAGE_u-boot-txcz-rk3128-v3-1:linaro-gcc-6.3.1/host
+
 
 PKG_MAINTAINER:=Sarah Maedel <openwrt@tbspace.de>
 
@@ -16,6 +24,14 @@ UBOOT_USE_INTREE_DTC:=1
 
 include $(INCLUDE_DIR)/u-boot.mk
 include $(INCLUDE_DIR)/package.mk
+
+define Build/Prepare/Default
+	$(PKG_UNPACK)
+	-find $(PKG_BUILD_DIR) -mindepth 1 -type f -not -name '.*' -not -name 'version.date' -printf '%T@\n' 2>/dev/null |\
+		cut -d. -f1 | sort -n | tail -n1 > $(PKG_BUILD_DIR)/version.date
+	[ ! -d ./src/ ] || $(CP) ./src/. $(PKG_BUILD_DIR)
+	$(if $(filter txcz-rk3128-v3-1,$(BUILD_VARIANT)),echo "Skipping patches for TXCZ RK3128";,$(Build/Patch))
+endef
 
 define U-Boot/Default
   BUILD_TARGET:=rockchip
@@ -49,11 +65,12 @@ define U-Boot/rk3128/Default
 endef
 
 
-define U-Boot/txcz-v3-1-rk3128
+define U-Boot/txcz-rk3128-v3-1
   $(U-Boot/rk3128/Default)
   NAME:=TXCZ V3-1
+  UBOOT_CROSS_COMPILE:=$(STAGING_DIR_HOST)/linaro-gcc-6.3.1/bin/arm-linux-gnueabihf-
   BUILD_DEVICES:= \
-    txcz_v3-1
+    txcz_rk3128-v3-1
 endef
 
 # RK3328 boards
@@ -425,7 +442,7 @@ define U-Boot/rock-5c-rk3588s
 endef
 
 UBOOT_TARGETS := \
-  txcz-v3-1-rk3128 \
+  txcz-rk3128-v3-1 \
   nanopc-t4-rk3399 \
   nanopi-r4s-rk3399 \
   rock-4c-plus-rk3399 \
@@ -471,9 +488,9 @@ UBOOT_TARGETS := \
 
 UBOOT_CONFIGURE_VARS += USE_PRIVATE_LIBGCC=yes
 
-UBOOT_CUSTOMIZE_CONFIG := \
-	--disable TOOLS_MKEFICAPSULE \
-	--set-str MKIMAGE_DTC_PATH $(PKG_BUILD_DIR)/scripts/dtc/dtc
+UBOOT_CUSTOMIZE_CONFIG = $(if $(filter txcz-rk3128-v3-1,$(BUILD_VARIANT)),,\
+        --disable TOOLS_MKEFICAPSULE \
+        --set-str MKIMAGE_DTC_PATH $(PKG_BUILD_DIR)/scripts/dtc/dtc)
 
 UBOOT_MAKE_FLAGS += \
   BL31=$(STAGING_DIR_IMAGE)/$(ATF) \
@@ -481,7 +498,7 @@ UBOOT_MAKE_FLAGS += \
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)
-	$(CP) $(PKG_BUILD_DIR)/u-boot-rockchip.bin $(STAGING_DIR_IMAGE)/$(BUILD_VARIANT)-u-boot-rockchip.bin
+	if [ "$(BUILD_VARIANT)" = "txcz-rk3128-v3-1" ]; then $(CP) $(PKG_BUILD_DIR)/u-boot.bin $(STAGING_DIR_IMAGE)/$(BUILD_VARIANT)-u-boot.bin; else $(CP) $(PKG_BUILD_DIR)/u-boot-rockchip.bin $(STAGING_DIR_IMAGE)/$(BUILD_VARIANT)-u-boot-rockchip.bin; fi
 endef
 
 define Package/u-boot/install/default

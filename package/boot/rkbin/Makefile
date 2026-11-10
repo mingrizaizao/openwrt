@@ -25,6 +25,11 @@ define Trusted-Firmware-A/Default
   BUILD_TARGET:=rockchip
 endef
 
+define Trusted-Firmware-A/rk3128
+  NAME:=Rockchip RK3128
+  BUILD_SUBTARGET:=armv7
+endef
+
 define Trusted-Firmware-A/rk3308
   BUILD_SUBTARGET:=armv8
   ATF:=rk33/rk3308_bl31_v2.27.elf
@@ -74,6 +79,7 @@ define Trusted-Firmware-A/rk3588-tpl
 endef
 
 TFA_TARGETS:= \
+	rk3128 \
 	rk3308 \
 	rk3308-tpl-rock-pi-s \
 	rk3528 \
@@ -126,5 +132,35 @@ ifneq ($(ATF),)
 endif
 	$(CP) $(PKG_BUILD_DIR)/bin/$(TPL) $(STAGING_DIR_IMAGE)/
 endef
+
+
+ifeq ($(BUILD_VARIANT),rk3128)
+
+define Build/InstallDev
+	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)/rkbin/tools
+	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)/rkbin/RKBOOT
+	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)/rkbin/RKTRUST
+	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)/rkbin/bin/rk31
+
+	$(CP) $(PKG_BUILD_DIR)/tools/boot_merger $(STAGING_DIR_IMAGE)/rkbin/tools/
+	$(CP) $(PKG_BUILD_DIR)/tools/loaderimage $(STAGING_DIR_IMAGE)/rkbin/tools/
+	$(CP) $(PKG_BUILD_DIR)/tools/mkimage $(STAGING_DIR_IMAGE)/rkbin/tools/
+
+	$(CP) $(PKG_BUILD_DIR)/RKBOOT/RK3128MINIALL.ini $(STAGING_DIR_IMAGE)/rkbin/RKBOOT/
+	$(CP) $(PKG_BUILD_DIR)/RKTRUST/RK3126TOS.ini $(STAGING_DIR_IMAGE)/rkbin/RKTRUST/
+	$(CP) $(PKG_BUILD_DIR)/RKTRUST/RK3128TOS.ini $(STAGING_DIR_IMAGE)/rkbin/RKTRUST/
+
+	$(CP) $(PKG_BUILD_DIR)/bin/rk31/rk3128_ddr_300MHz_v2.12.bin $(STAGING_DIR_IMAGE)/rkbin/bin/rk31/
+	$(CP) $(PKG_BUILD_DIR)/bin/rk31/rk3128_usbplug_v2.63.bin $(STAGING_DIR_IMAGE)/rkbin/bin/rk31/
+	$(CP) $(PKG_BUILD_DIR)/bin/rk31/rk312x_miniloader_v2.63.bin $(STAGING_DIR_IMAGE)/rkbin/bin/rk31/
+	$(CP) $(PKG_BUILD_DIR)/bin/rk31/rk3128x_miniloader_v2.57.bin $(STAGING_DIR_IMAGE)/rkbin/bin/rk31/
+	$(CP) $(PKG_BUILD_DIR)/bin/rk31/rk3126_tee_ta_v2.04.bin $(STAGING_DIR_IMAGE)/rkbin/bin/rk31/
+endef
+
+define Package/trusted-firmware-a-rk3128/install
+endef
+
+endif
+
 
 $(eval $(call BuildPackage/Trusted-Firmware-A))

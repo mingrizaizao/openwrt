@@ -21,16 +21,16 @@ Signed-off-by: Hauke Mehrtens <hauke@hauke-m.de>
 
 --- a/include/image.h
 +++ b/include/image.h
-@@ -16,7 +16,9 @@
- #define __IMAGE_H__
+@@ -18,7 +18,9 @@
  
  #include "compiler.h"
+ #include <stdbool.h>
 +#ifdef linux
  #include <asm/byteorder.h>
 +#endif
- #include <stdbool.h>
  
  /* Define this to avoid #ifdefs later on */
+ struct lmb;
 --- a/include/linux/posix_types.h
 +++ b/include/linux/posix_types.h
 @@ -43,6 +43,8 @@ typedef void (*__kernel_sighandler_t)(in

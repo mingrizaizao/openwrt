@@ -24,15 +24,15 @@ This patch makes it possible to set a custom image magic.
  		"          -a ==> set load address to 'addr' (hex)\n"
  		"          -e ==> set entry point to 'ep' (hex)\n"
  		"          -n ==> set image name to 'name'\n"
-@@ -160,7 +162,7 @@ static int add_content(int type, const c
- }
+@@ -146,7 +146,7 @@
+ 	int opt;
  
- static const char optstring[] =
--	"a:A:b:B:c:C:d:D:e:Ef:Fg:G:i:k:K:ln:N:o:O:p:qrR:stT:vVx";
-+	"a:A:b:B:c:C:d:D:e:Ef:Fg:G:i:k:K:lM:n:N:o:O:p:qrR:stT:vVx";
- 
- static const struct option longopts[] = {
- 	{ "load-address", required_argument, NULL, 'a' },
+ 	while ((opt = getopt(argc, argv,
+-			     "a:A:b:c:C:d:D:e:Ef:Fk:i:K:ln:N:p:O:rR:qsT:v:VxX:")) != -1) {
++			     "a:A:b:c:C:d:D:e:Ef:Fk:i:K:lM:n:N:p:O:rR:qsT:v:VxX:")) != -1) {
+ 		switch (opt) {
+ 		case 'a':
+ 			params.addr = strtoull(optarg, &ptr, 16);
 @@ -304,6 +306,14 @@ static void process_args(int argc, char
  		case 'l':
  			params.lflag = 1;

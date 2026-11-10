@@ -66,6 +66,7 @@ define U-Boot/Init
   VARIANT:=$(1)
   UBOOT_CONFIG:=$(1)
   UBOOT_IMAGE:=u-boot.bin
+  UBOOT_CROSS_COMPILE:=$(TARGET_CROSS)
 endef
 
 TARGET_DEP = TARGET_$(BUILD_TARGET)$(if $(BUILD_SUBTARGET),_$(BUILD_SUBTARGET))
@@ -114,13 +115,13 @@ endef
 
 define Build/Configure/U-Boot
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
-		CROSS_COMPILE=$(TARGET_CROSS) \
+		CROSS_COMPILE=$(UBOOT_CROSS_COMPILE) \
 		$(UBOOT_CONFIGURE_VARS) \
 		$(firstword $(UBOOT_CONFIG))_config \
 		$(wordlist 2,$(words $(UBOOT_CONFIG)),$(UBOOT_CONFIG:%=%.config))
 	$(if $(strip $(UBOOT_CUSTOMIZE_CONFIG)),
 		$(PKG_BUILD_DIR)/scripts/config --file $(PKG_BUILD_DIR)/.config $(UBOOT_CUSTOMIZE_CONFIG)
-		+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) CROSS_COMPILE=$(TARGET_CROSS) $(UBOOT_CONFIGURE_VARS) oldconfig)
+		+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) CROSS_COMPILE=$(UBOOT_CROSS_COMPILE) $(UBOOT_CONFIGURE_VARS) oldconfig)
 endef
 
 ifndef UBOOT_USE_INTREE_DTC
@@ -129,7 +130,7 @@ endif
 
 define Build/Compile/U-Boot
 	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
-		CROSS_COMPILE=$(TARGET_CROSS) \
+		CROSS_COMPILE=$(UBOOT_CROSS_COMPILE) \
 		$(if $(DTC),DTC="$(DTC)") \
 		$(UBOOT_MAKE_FLAGS)
 endef
