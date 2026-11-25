@@ -1,3 +1,94 @@
+
+从头编译：
+----------------------------------------------
+安装环境：
+sudo apt update
+
+sudo apt install -y \
+  build-essential clang flex bison g++ gawk gcc-multilib \
+  g++-multilib gettext git libncurses-dev libssl-dev \
+  python3 python3-setuptools python3-dev rsync swig unzip \
+  zlib1g-dev file wget curl time \
+  libelf-dev libdw-dev libcap-dev \
+  cpio ecj fastjar java-propose-classpath \
+  libgmp3-dev libmpc-dev libmpfr-dev \
+  libxml-parser-perl libyaml-dev xsltproc \
+  qemu-utils mkisofs
+
+
+下载源码：
+cd ~
+
+git clone \
+  --branch rk3128-dev \
+  --single-branch \
+  git@github.com:mingrizaizao/openwrt.git \
+  openwrt
+
+cd ~/openwrt
+
+
+
+安装依赖：
+cd ~/openwrt
+
+./scripts/feeds update -a
+./scripts/feeds install -a
+
+
+#配置：
+cd ~/openwrt
+cp txcz-rk3128-v3-1.config .config
+make defconfig
+
+
+
+#下载：#编译：
+# make download -j8
+make -j$(nproc) V=s
+
+
+#查看镜像：
+find bin/targets/rockchip/armv7/ -maxdepth 1 -type f -printf '%f\n'
+
+
+
+
+烧录内存卡：
+lsblk -o NAME,SIZE,MODEL,TRAN,FSTYPE,MOUNTPOINTS
+
+
+cd ~/openwrt
+
+ls -l bin/targets/rockchip/armv7/openwrt-rockchip-armv7-txcz_rk3128-v3-1-squashfs-sysupgrade.img.gz
+
+FILE=bin/targets/rockchip/armv7/openwrt-rockchip-armv7-txcz_rk3128-v3-1-squashfs-sysupgrade.img.gz
+
+sudo umount /dev/sda1 2>/dev/null || true
+sudo umount /dev/sda2 2>/dev/null || true
+
+gzip -dc "$FILE" | sudo dd of=/dev/sda bs=4M status=progress conv=fsync
+
+sync
+
+--------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
